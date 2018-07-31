@@ -1,0 +1,235 @@
+\documentclass[]{article}%twocolumn
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{float}
+%\usepackage{setspace}
+\usepackage{subfigure}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{flushend}
+% Title Page
+\title{Optimización I\\
+		Artículo: An adaptative three-term conjugate gradiente method base on self-scaling memoryless BFGS matrix}
+\author{Shengwei Yao\\
+	Liangshuo Ning\\
+	Fernando Emilio Romero de los Santos}
+\usepackage{vmargin}
+
+
+
+\setpapersize{A4}
+\setmargins{1.0cm}
+{1.5cm}
+{16.5cm}
+{23.42cm}
+{10pt}
+{1cm}
+{0pt}
+{2cm}
+
+\spanishdecimal{.}
+\newcommand{\dpar}[2]{\frac{\partial#1}{\partial#2}}
+
+\makeatletter
+\renewcommand{\ALG@name}{Algoritmo}
+\renewcommand{\listalgorithmname}{List of \ALG@name s}
+\newcommand{\hz}{\hat{z}}
+\newcommand{\heta}{\hat{\eta}}
+\makeatother
+\begin{document}
+%\onecolumn[
+%	\maketitle
+%	\begin{abstract}
+%		a
+%	\end{abstract}
+%]
+%\twocolumn[
+%\begin{@twocolumnfalse}
+%	\maketitle
+%	\begin{abstract}
+%	Resumen original: 
+%	Due to its simplicity and low memory requirement, conjugate gradient methods are widely used for solving large-scale unconstrained optimization problems. In this paper, we propose a three-term conjugate gradient method. The search direction is given by a symmetrical Perry matrix, which contains a positive parameter. The value of this parameter is determined by minimizing the distance of this matrix and the self-scaling memoryless BFGS matrix in the Frobenius norm. The sufficient descent property of the generated directions holds independent of line searches. The global convergence of the given method is established under Wolfe line search for general non-convex functions. Numerical experiments show that the proposed method is promising.
+%	\end{abstract}
+%\end{@twocolumnfalse}
+%]
+
+
+%\doublespacing
+%\begin{center}
+%	\begin{figure}%[H]
+%		\includegraphics[width=4cm]{cimat_logo.png}
+%	\end{figure}
+%	\begin{Huge}
+%		CIMAT A.C. 
+%	\end{Huge}\\
+%	\begin{LARGE}
+%Método de los volumenes finitos
+%	\end{LARGE}\\
+%	Esquema QUICK: Quadratic Upstream Interpolation Convective Kinematics\\
+%	Fernando Emilio Romero de los Santos
+%\end{center}
+%\singlespacing
+
+\section*{Forma 2}
+Para este caso consideramos el vector $\vec{u}_i=\left[z_i,\eta_i\right]^T$, 
+tenemos los resultados obtenidos para un elemento, 
+\begin{equation}\label{mzeta}
+	z_i=a_i \hz_{i+1/2} +a_i \hz_{i-1/2}
+\end{equation}
+\begin{equation}\label{meta}
+	\eta_i=b_i+\heta_{i+1/2}+b_i \heta_{i-1/2}+b_i f_i
+\end{equation}
+para el ejemplo que se está trabajando consideramos $f=0$, por lo que se elimina de \eqref{meta}, 
+y en el punto frontera $x_{i+1/2}$, tenemos 
+\begin{equation}\label{mf1}
+	\eta_i+z_i-\hz_{i+1/2}-\eta_{i+1}+z_{i+1}-\hz_{i+1/2}=0
+\end{equation}
+\begin{equation}\label{mf2}
+	z_i+\eta_i-\heta_{i+1/2} -z_{i+1}+\eta_{i+1}-\heta_{i+1/2}=0
+\end{equation}
+sustituyendo \eqref{mzeta} y \eqref{mzeta} en \eqref{mf1} y \eqref{mf2} se obtiene el siguiente sistema
+\begin{equation}\label{sis1}
+	a_i \hz_{i-1/2} +(a_i+a_{i+1}-2)\hz_{i+1/2}+a_{i+1}\hz_{i+3/2} + b_i \heta_{i-1/2} +(b_i-b_{i+1})\heta_{i+1/2} -b_{i+1} \heta_{i+3/2}=0
+\end{equation}
+\begin{equation}\label{sis2}
+	a_i\hz_{i-1/2} + (a_i-a_{i+1})\hz_{i+1/2}-a_{i+1}\hz_{i+3/2}+b_i\heta_{i-1/2}+(b_i+b_{i+1}-2)\heta_{i+1/2} + b_{i+1} \heta_{i+3/2}=0
+\end{equation}
+Podemos escribir el sistema como 
+\begin{equation}
+	A_{i+1/2,i-1/2} \vec{u}_{i-1/2} + A_{i+1/2,i+1/2} \vec{u}_{i+1/2} + A_{i+1/2,i+3/2} \vec{u}_{i+3/2}=\mathbf{0}
+\end{equation}
+con 
+\begin{equation}
+	A_{i+1/2,i-1/2}=\begin{bmatrix}
+	a_i & b_i \\
+	a_i & b_i 
+	\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+A_{i+1/2,i+1/2}=\begin{bmatrix}
+a_i+a_{i+1}-2 & b_i-b_{i+1} \\
+a_i-a_{i+1} & b_i+b_{i+1}-2 
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+A_{i+1/2,i-1/2}=\begin{bmatrix}
+a_{i+1} & -b_{i+1} \\
+-a_{i+1} & b_{i+1} 
+\end{bmatrix}
+\end{equation}
+
+con lo cual obtenemos el siguiente sistema 
+\begin{equation}
+\begin{bmatrix}
+0  & 0 &0 &0 &0 &0 & 0 &0&\dots &0  \\
+0  & 0 &0 &0 &0 &0 &0&0& \dots &0  \\
+a_1&b_1&a_1+a_2-2& b_1-b_2& a_2 & -b_2&0&0&\dots &0 \\
+a_1&b_1&a_1-a_2& b_1+b_2-2&-a_2 &b_2&0&0&\dots &0 \\
+0&0&a_2&b_2&a_2+a_3-2& b_2-b_3& a_3 & -b_3&\dots &0 \\
+0&0&a_2&b_2&a_2-a_3& b_2+b_3-2&-a_3 &b_3&\dots &0 \\
+\vdots  & \vdots &\vdots &\vdots &\vdots &\vdots & \vdots &\vdots &\vdots &\vdots  \\
+\dots  & \dots &\dots &\dots &\dots &\dots & \dots &\dots &\dots &\dots  \\
+\vdots  & \vdots &\vdots &\vdots &\vdots &\vdots & \vdots &\vdots &\vdots &\vdots  \\
+0&\dots  &a_{n-1}&b_{n-1}&a_{n-1}+a_n-2& b_{n-1}-b_n& a_n & -b_n & 0 & 0 \\
+0&\dots  &a_{n-1}&b_{n-1}&a_{n-1}-a_n& b_{n-1}+b_n-2&-a_n &b_n & 0 & 0 \\
+0  & \cdots &0 &0 &0 &0 & 0 &0&0 &0  \\
+0  & \cdots &0 &0 &0 &0 &0&0& 0 &0  \\
+\end{bmatrix}
+\begin{bmatrix}
+\hz_{1/2} \\ \heta_{1/2} \\
+\hz_{3/2} \\ \heta_{3/2} \\
+\hz_{5/2} \\ \heta_{5/2} \\
+\hz_{7/2} \\ \heta_{7/2} \\
+\vdots \\ % \vdots \\
+\hz_{n-1/2} \\ \heta_{n-1/2} \\
+\hz_{n+1/2} \\ \heta_{n+1/2} \\
+\end{bmatrix}
+= 
+\begin{bmatrix}
+0 \\ 0 \\0 \\0\\0 \\0\\0\\0\\
+\vdots \\ 
+0 \\0\\0\\0\\
+\end{bmatrix}
+\end{equation}
+
+lo que sigue es como tratar los puntos en la frontera, $\vec{u}_{1/2}$ y $\vec{u}_{n+1/2}$, se presentarán dos propuestas y los resultados obtenidos con cada uno 
+\subsection*{Sin ninguna aproximación}
+\begin{equation}
+\begin{split}
+\begin{bmatrix}
+a_0+a_1-2 &b_0-b_1 &a_1 &-b_1 & 0&0 &0 &0&\dots &0  \\
+a_0-a_1 &b_0+b_1-2 &-a_1 &b_1&0 &0 &0&0& \dots &0  \\
+a_1&b_1&a_1+a_2-2& b_1-b_2& a_2 & -b_2&0&0&\dots &0 \\
+a_1&b_1&a_1-a_2& b_1+b_2-2&-a_2 &b_2&0&0&\dots &0 \\
+0&0&a_2&b_2&a_2+a_3-2& b_2-b_3& a_3 & -b_3&\dots &0 \\
+0&0&a_2&b_2&a_2-a_3& b_2+b_3-2&-a_3 &b_3&\dots &0 \\
+\vdots  & \vdots &\vdots &\vdots &\vdots &\vdots & \vdots &\vdots &\vdots &\vdots  \\
+\dots  & \dots &\dots &\dots &\dots &\dots & \dots &\dots &\dots &\dots  \\
+\vdots  & \vdots &\vdots &\vdots &\vdots &\vdots & \vdots &\vdots &\vdots &\vdots  \\
+0&\dots  &a_{n-1}&b_{n-1}&a_{n-1}+a_n-2& b_{n-1}-b_n& a_n & -b_n & 0 & 0 \\
+0&\dots  &a_{n-1}&b_{n-1}&a_{n-1}-a_n& b_{n-1}+b_n-2&-a_n &b_n & 0 & 0 \\
+0  & \cdots &0 &0 &0 &0 & a_n & b_n  & a_n+a_{n+1}-2 &b_n-b_{n+1}  \\
+0  & \cdots &0 &0 &0 &0 & a_n & b_n  & a_n-a_{n+1} &b_n+b_{n+1}-2  \\
+\end{bmatrix} \\
+\ast \begin{bmatrix}
+\hz_{1/2} \\ \heta_{1/2} \\
+\hz_{3/2} \\ \heta_{3/2} \\
+\hz_{5/2} \\ \heta_{5/2} \\
+\hz_{7/2} \\ \heta_{7/2} \\
+\vdots \\ % \vdots \\
+\hz_{n-1/2} \\ \heta_{n-1/2} \\
+\hz_{n+1/2} \\ \heta_{n+1/2} \\
+\end{bmatrix}
+= 
+\begin{bmatrix}
+0 \\ 0 \\0 \\0\\0 \\0\\0\\0\\
+\vdots \\ 
+0 \\0\\0\\0\\
+\end{bmatrix}
+\end{split}
+\end{equation}
+donde asumimos que tenemos información más allá de la frontera, osea de $a_0$, $b_0$, $a_{n+1}$ y $b_{n+1}$. 
+\subsection*{Extrapolación lineal de $z_0$ y $\eta_0$}
+\begin{equation}
+\begin{split}
+\begin{bmatrix}
+3a_1-2  & b_1 &3a_1-a_2 &b_1-b_2 &-a_2 &-b_2 & 0 &0&\dots &0  \\
+a_1  & 3b_1-2 &a_1-a_2 &3b_1-b_2 &-a_2 &-b_2 &0&0& \dots &0  \\
+a_1&b_1&a_1+a_2-2& b_1-b_2& a_2 & -b_2&0&0&\dots &0 \\
+a_1&b_1&a_1-a_2& b_1+b_2-2&-a_2 &b_2&0&0&\dots &0 \\
+0&0&a_2&b_2&a_2+a_3-2& b_2-b_3& a_3 & -b_3&\dots &0 \\
+0&0&a_2&b_2&a_2-a_3& b_2+b_3-2&-a_3 &b_3&\dots &0 \\
+\vdots  & \vdots &\vdots &\vdots &\vdots &\vdots & \vdots &\vdots &\vdots &\vdots  \\
+\dots  & \dots &\dots &\dots &\dots &\dots & \dots &\dots &\dots &\dots  \\
+\vdots  & \vdots &\vdots &\vdots &\vdots &\vdots & \vdots &\vdots &\vdots &\vdots  \\
+0&\dots  &a_{n-1}&b_{n-1}&a_{n-1}+a_n-2& b_{n-1}-b_n& a_n & -b_n & 0 & 0 \\
+0&\dots  &a_{n-1}&b_{n-1}&a_{n-1}-a_n& b_{n-1}+b_n-2&-a_n &b_n & 0 & 0 \\
+0  & \cdots &0 &0 &-a_{n-1} &b_{n-1} & 3a_n-a_{n-1} &b_{n-1}-b_n &3a_n-2 &-b_n  \\
+0  & \cdots &0 &0 &a_{n-1} &-b_{n-1} & a_{n-1}-a_n &3b_n-b_{n-1} & -a_n &3b_n-2  \\
+\end{bmatrix} \\ \ast
+\begin{bmatrix}
+\hz_{1/2} \\ \heta_{1/2} \\
+\hz_{3/2} \\ \heta_{3/2} \\
+\hz_{5/2} \\ \heta_{5/2} \\
+\hz_{7/2} \\ \heta_{7/2} \\
+\vdots \\ % \vdots \\
+\hz_{n-1/2} \\ \heta_{n-1/2} \\
+\hz_{n+1/2} \\ \heta_{n+1/2} \\
+\end{bmatrix}
+= 
+\begin{bmatrix}
+0 \\ 0 \\0 \\0\\0 \\0\\0\\0\\
+\vdots \\ 
+0 \\0\\0\\0\\
+\end{bmatrix}
+\end{split}
+\end{equation}
+\subsection*{Extrapolación lineal de $z_{-1/2}$ y $\eta_{-1/2}$ ????}
+
+\end{document}          
