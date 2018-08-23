@@ -1,0 +1,2 @@
+plot "exactaci.dat" w l, filename w lp
+pause -1
