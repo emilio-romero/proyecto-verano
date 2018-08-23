@@ -4,11 +4,6 @@ int interfase_Poisson(int nnodos, double *malla, double pinterfase,
     double(*a)(double,double),
     int tipofrontera1, double frontera1, 
     int tipofrontera2, double frontera2){
-  /*
-  gsl_vector *e=gsl_vector_calloc(nnodos-1); //Arriba
-  gsl_vector *d=gsl_vector_calloc(nnodos); 
-  gsl_vector *f=gsl_vector_calloc(nnodos-1);//Abajo
-  */ // Cambiar todo eso por una matriz de (2*(nnodos-1) x 2*(nnodos-1))
   gsl_matrix *F=gsl_matrix_calloc(2*(nnodos-1),2*(nnodos-1));
   gsl_vector *b=gsl_vector_calloc(2*(nnodos-1)); 
   gsl_vector *resmedios=gsl_vector_calloc(2*(nnodos-1)); 
@@ -47,41 +42,41 @@ int interfase_Poisson(int nnodos, double *malla, double pinterfase,
     ai=1.0/(2.0+dxi/(a(malla[0],pinterfase)));
     aip1=1.0/(2.0+dxip1/(a(malla[1],pinterfase)));
     /*Submatriz 2 (central)*/ 
-    gsl_matrix_set(F,0,0,3*ai-2.0);//-2.0+ai+aip1);
-    gsl_matrix_set(F,0,1,bi);//bi-bip1);
+    gsl_matrix_set(F,0,0,ai-1.0);//-2.0+ai+aip1);
+    //gsl_matrix_set(F,0,1,-2.0+bi);//bi-bip1);
     gsl_matrix_set(F,1,0,ai);//ai-aip1);
     gsl_matrix_set(F,1,1,3*bi-2.0);//-2.0+bi+bip1);
     /*Submatriz 3 (derecha)*/
-    gsl_matrix_set(F,0,2,3*ai-aip1);//aip1);
-    gsl_matrix_set(F,0,3,bi-bip1);//-bip1);
+    gsl_matrix_set(F,0,2,ai);//aip1);
+    //gsl_matrix_set(F,0,3,bi);//-bip1);
     gsl_matrix_set(F,1,2,ai-aip1);//-aip1);
     gsl_matrix_set(F,1,3,3*bi-bip1);//bip1);
     /*Submatriz 3 (derecha)*/
-    gsl_matrix_set(F,0,4,-aip1);
+    /*gsl_matrix_set(F,0,4,-aip1);
     gsl_matrix_set(F,0,5,-bip1);
     gsl_matrix_set(F,1,4,-aip1);
     gsl_matrix_set(F,1,5,-bip1);
-
+*/
   /*===== Punto x_n+1/2  =====*/
     dxi=0.5*(malla[nnodos-1]-malla[nnodos-3]);
     dxip1=(malla[nnodos-1]-malla[nnodos-2]);
     ai=1.0/(2.0+dxi/(a(malla[nnodos-2],pinterfase)));
     aip1=1.0/(2.0+dxip1/(a(malla[nnodos-1],pinterfase)));
     /*Submatriz 1 (mas izquierda)*/
-    gsl_matrix_set(F,2*nnodos-4,2*nnodos-8,-ai); 
+    /*gsl_matrix_set(F,2*nnodos-4,2*nnodos-8,-ai); 
     gsl_matrix_set(F,2*nnodos-4,2*nnodos-7,bi); 
     gsl_matrix_set(F,2*nnodos-3,2*nnodos-8,ai); 
-    gsl_matrix_set(F,2*nnodos-3,2*nnodos-7,-bi); 
+    gsl_matrix_set(F,2*nnodos-3,2*nnodos-7,-bi); */
     /*Submatriz 1 (izquierda)*/
-    gsl_matrix_set(F,2*nnodos-4,2*nnodos-6,3.0*aip1-ai); 
-    gsl_matrix_set(F,2*nnodos-4,2*nnodos-5,bi-bip1); 
+    gsl_matrix_set(F,2*nnodos-4,2*nnodos-6,ai); 
+    //gsl_matrix_set(F,2*nnodos-4,2*nnodos-5,bi-bip1); 
     gsl_matrix_set(F,2*nnodos-3,2*nnodos-6,ai-aip1); 
     gsl_matrix_set(F,2*nnodos-3,2*nnodos-5,3.0*bip1-bi); 
     /*Submatriz 2 (central)*/ 
-    gsl_matrix_set(F,2*nnodos-4,2*nnodos-4,3.0*aip1-2.0);
-    gsl_matrix_set(F,2*nnodos-4,2*nnodos-3,-bip1);
-    gsl_matrix_set(F,2*nnodos-3,2*nnodos-4,-aip1);
-    gsl_matrix_set(F,2*nnodos-3,2*nnodos-3,3.0*bip1-2.0);
+    gsl_matrix_set(F,2*nnodos-4,2*nnodos-4,ai-1.0);
+    //gsl_matrix_set(F,2*nnodos-4,2*nnodos-3,-bi);
+    gsl_matrix_set(F,2*nnodos-3,2*nnodos-4,ai);
+    gsl_matrix_set(F,2*nnodos-3,2*nnodos-3,3.0*bi-2.0);
 
   /*===== Agregar condiciones de frontera =====*/
   manejofronteras=condiciones_Frontera(tipofrontera1,frontera1,tipofrontera2,frontera2,
@@ -133,9 +128,6 @@ int interfase_Poisson(int nnodos, double *malla, double pinterfase,
   }
   printf("Fin medios\n");
   */
-  /*gsl_vector_free(d);
-  gsl_vector_free(e);
-  gsl_vector_free(f);*/
   gsl_matrix_free(F);
   gsl_vector_free(b);
   gsl_vector_free(resmedios);
