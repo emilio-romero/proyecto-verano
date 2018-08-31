@@ -9,7 +9,7 @@
 /*===== Condicion de frontera=====*/
 double fa1(double x, double pinterfase){
   if(x<pinterfase){
-    return(0.01); 
+    return(1.0); 
   }
   else{
     return(1.0);
