@@ -43,15 +43,15 @@ int interfase_Poisson(int nnodos, double *malla, double pinterfase,
     ai=1.0/(2.0+dxi/(a(malla[0],pinterfase)));
     aip1=1.0/(2.0+dxip1/(a(malla[1],pinterfase)));
     /*Submatriz 2 (central)*/ 
-    gsl_matrix_set(F,0,0,ai-1.0);//-2.0+ai+aip1);
-    //gsl_matrix_set(F,0,1,-2.0+bi);//bi-bip1);
-    gsl_matrix_set(F,1,0,ai);//ai-aip1);
-    gsl_matrix_set(F,1,1,3*bi-2.0);//-2.0+bi+bip1);
+    gsl_matrix_set(F,0,0,ai+aip1-2.0);
+    gsl_matrix_set(F,0,1,1.0-ai-bi);
+    gsl_matrix_set(F,1,0,ai-aip1);//ai-aip1);
+    gsl_matrix_set(F,1,1,bip1-ai-1.0);//-2.0+bi+bip1);
     /*Submatriz 3 (derecha)*/
-    gsl_matrix_set(F,0,2,ai);//aip1);
-    //gsl_matrix_set(F,0,3,bi);//-bip1);
-    gsl_matrix_set(F,1,2,ai-aip1);//-aip1);
-    gsl_matrix_set(F,1,3,3*bi-bip1);//bip1);
+    gsl_matrix_set(F,0,2,aip1);//aip1);
+    gsl_matrix_set(F,0,3,-bip1);//-bip1);
+    gsl_matrix_set(F,1,2,-aip1);//-aip1);
+    gsl_matrix_set(F,1,3,bip1);//bip1);
     /*Submatriz 3 (derecha)*/
     /*gsl_matrix_set(F,0,4,-aip1);
     gsl_matrix_set(F,0,5,-bip1);
