@@ -4,16 +4,16 @@ int interfase_Poisson(int nnodos, double *malla, double pinterfase,
     double(*a)(double,double),
     int tipofrontera1, double frontera1, 
     int tipofrontera2, double frontera2){
-  int nelem=nnodos-1;
-  gsl_matrix *F=gsl_matrix_calloc(2*(nelem-2),2*(nelem-2));
-  gsl_vector *b=gsl_vector_calloc(2*(nelem-2)); 
-  gsl_vector *resmedios=gsl_vector_calloc(2*(nelem-2)); 
+  int nmedios=nnodos-1;
+  gsl_matrix *F=gsl_matrix_calloc(2*(nmedios-2),2*(nmedios-2));
+  gsl_vector *b=gsl_vector_calloc(2*(nmedios-2)); 
+  gsl_vector *resmedios=gsl_vector_calloc(2*(nmedios-2)); 
   double ai,aip1,bi=0.5,bip1=0.5; 
   double dxi,dxip1;
   int nodoactl, nodoactlp1; 
   int manejofronteras=0; 
  
-  for(int i=1;i<nelem-2;++i){
+  for(int i=1;i<nmedios-2;++i){
     nodoactl=2*i; 
     nodoactlp1=2*i+1; 
     dxi=0.5*(malla[i+1]-malla[i-1]);
@@ -69,15 +69,15 @@ int interfase_Poisson(int nnodos, double *malla, double pinterfase,
     gsl_matrix_set(F,2*nnodos-3,2*nnodos-8,ai); 
     gsl_matrix_set(F,2*nnodos-3,2*nnodos-7,-bi); */
     /*Submatriz 1 (izquierda)*/
-    gsl_matrix_set(F,2*nnodos-4,2*nnodos-6,ai); 
-    //gsl_matrix_set(F,2*nnodos-4,2*nnodos-5,bi-bip1); 
-    gsl_matrix_set(F,2*nnodos-3,2*nnodos-6,ai-aip1); 
-    gsl_matrix_set(F,2*nnodos-3,2*nnodos-5,3.0*bip1-bi); 
+    gsl_matrix_set(F,2*nmedios-6,2*nmedios-8,ai); 
+    gsl_matrix_set(F,2*nmedios-6,2*nmedios-7,bi-bip1); 
+    gsl_matrix_set(F,2*nmedios-5,2*nmedios-8,ai-aip1); 
+    gsl_matrix_set(F,2*nmedios-5,2*nmedios-7,3.0*bip1-bi); 
     /*Submatriz 2 (central)*/ 
-    gsl_matrix_set(F,2*nnodos-4,2*nnodos-4,ai-1.0);
-    //gsl_matrix_set(F,2*nnodos-4,2*nnodos-3,-bi);
-    gsl_matrix_set(F,2*nnodos-3,2*nnodos-4,ai);
-    gsl_matrix_set(F,2*nnodos-3,2*nnodos-3,3.0*bi-2.0);
+    gsl_matrix_set(F,,ai-1.0);// Local a11
+    gsl_matrix_set(F,2*nmedios-6,2*nmedios-5,-bi);// Local a12
+    gsl_matrix_set(F,2*nmedios-5,n*nmedios-6,ai); //Local a21
+    gsl_matrix_set(F,2*nmedios-5,2*nmedios-5,3.0*bi-2.0);//Local a22
 
   /*===== Agregar condiciones de frontera =====*/
   manejofronteras=condiciones_Frontera(tipofrontera1,frontera1,tipofrontera2,frontera2,
